@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.UI;
+using Vilar.Entity;
 
 namespace archi_mods
 {
@@ -22,7 +23,7 @@ namespace archi_mods
 
         // Define separate arrays to store activation status for each tab
         private readonly bool[] _mainCheatsActivated = new bool[8];
-        private readonly bool[] _specialCheatsActivated = new bool[0]; // Adjust the size as per your requirement
+        private readonly bool[] _specialCheatsActivated = new bool[2]; // Adjust the size as per your requirement
 
         // Default values
 
@@ -34,14 +35,14 @@ namespace archi_mods
         private readonly List<(string label, Action action)> _mainCheatsButtonActions = new()
         {
             ("Invincibility", ToggleInvincibility),
-            ("Clothed Skeleton Mode", ToggleSkeletonModeClothed),
-            ("Naked Skeleton Mode", ToggleSkeletonModeNaked),
             // Add more buttons and actions here
         };
 
         // Modify the ghostModeButtonActions list to include a button for Special Cheats
         private readonly List<(string label, Action action)> _specialCheatsButtonActions = new()
         {
+            ("Clothed Skeleton Mode", ToggleSkeletonModeClothed),
+            ("Naked Skeleton Mode", ToggleSkeletonModeNaked),
             // Add more buttons for Special Cheats here
         };
 
@@ -265,6 +266,12 @@ namespace archi_mods
                 GUILayout.EndHorizontal();
             }
 
+            // Draw save game button
+            DrawSaveGameButton();
+            
+            // Draw Teleport button
+            DrawTeleportNpcsButton();
+            
             // faction button
             DrawFactionsOption();
             
@@ -462,6 +469,48 @@ namespace archi_mods
                     }
                 }
             }
+        }
+        
+        private void DrawSaveGameButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Save Game"))
+            {
+                Game.Save();
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawTeleportNpcsButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Teleport All NPCs"))
+            {
+                // Find the player GameObject
+                GameObject player = GameObject.Find("Player(Clone)");
+                if (player != null)
+                {
+                    // Get the player's position
+                    Vector3 playerPosition = player.transform.position;
+
+                    // Find all game objects with the name "Entity(Clone)"
+                    Entity[] entities = GameObject.FindObjectsOfType<Entity>();
+                    foreach (Entity entity in entities)
+                    {
+                        // Teleport the entity to the player's position
+                        entity.transform.position = playerPosition;
+                    }
+                }
+            }
+            GUILayout.EndHorizontal();
         }
     }
 }
