@@ -277,6 +277,9 @@ namespace archi_mods
             // Draw Teleport chests button
             DrawTeleportChestsButton();
             
+            // Draw teleport player button
+            DrawTeleportToGateButton();
+            
             // faction button
             DrawFactionsOption();
             
@@ -571,13 +574,43 @@ namespace archi_mods
                             {
                                 chest.transform.position = hit.point;
                             }
-                            else
-                            {
-                                Debug.LogWarning("Failed to place chest on terrain.");
-                            }
 
                             // Rotate the chest to face the same direction as the player
                             chest.transform.rotation = Quaternion.LookRotation(playerForward);
+                        }
+                    }
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawTeleportToGateButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Teleport To Gate"))
+            {
+                // Find the player GameObject
+                GameObject player = GameObject.Find("Player(Clone)");
+                if (player != null)
+                {
+                    // Find the gate GameObject
+                    GameObject gate = GameObject.Find("GateRing(Clone)");
+                    if (gate != null)
+                    {
+                        // Teleport the player to the gate's position
+                        player.transform.position = gate.transform.position;
+                    }
+                    if (gate == null)
+                    {
+                        GameObject gate2 = GameObject.Find("GateRing");
+                        if (gate2 != null)
+                        {
+                            // Teleport the player to the gate's position
+                            player.transform.position = gate2.transform.position;
                         }
                     }
                 }
