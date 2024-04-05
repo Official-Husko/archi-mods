@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -13,16 +13,16 @@ namespace archi_mods
     {
         private enum Tab
         {
-            MainCheats,
+            PlayerCheats,
             SpecialCheats
         }
 
-        private Tab _currentTab = Tab.MainCheats;
+        private Tab _currentTab = Tab.PlayerCheats;
         private bool _showMenu;
         private Rect _menuRect = new(20, 20, 430, 200); // Initial position and size of the menu
 
         // Define separate arrays to store activation status for each tab
-        private readonly bool[] _mainCheatsActivated = new bool[8];
+        private readonly bool[] _playerCheatsActivated = new bool[8];
         private readonly bool[] _specialCheatsActivated = new bool[2]; // Adjust the size as per your requirement
 
         // Default values
@@ -32,17 +32,17 @@ namespace archi_mods
         private int _selectedFactionIndex;
 
         // List to store button labels and corresponding actions for the current cheats tab
-        private readonly List<(string label, Action action)> _mainCheatsButtonActions = new()
+        private readonly List<(string label, Action action)> _playerCheatsButtonActions = new()
         {
             ("Invincibility", ToggleInvincibility),
+            ("Clothed Skeleton Mode", ToggleSkeletonModeClothed),
+            ("Naked Skeleton Mode", ToggleSkeletonModeNaked),
             // Add more buttons and actions here
         };
 
         // Modify the ghostModeButtonActions list to include a button for Special Cheats
         private readonly List<(string label, Action action)> _specialCheatsButtonActions = new()
         {
-            ("Clothed Skeleton Mode", ToggleSkeletonModeClothed),
-            ("Naked Skeleton Mode", ToggleSkeletonModeNaked),
             // Add more buttons for Special Cheats here
         };
 
@@ -112,7 +112,7 @@ namespace archi_mods
         }
 
         /// <summary>
-        /// Handles the GUI for the main menu
+        /// Handles the GUI for the player menu
         /// </summary>
         /// <param name="windowID">The ID of the window</param>
         private void MenuWindow(int windowID)
@@ -125,8 +125,8 @@ namespace archi_mods
 
             // Draw tabs
             GUILayout.BeginHorizontal();
-            // Draw the Main Cheats tab button
-            DrawTabButton(Tab.MainCheats, "Main Cheats");
+            // Draw the Player Cheats tab button
+            DrawTabButton(Tab.PlayerCheats, "Player Cheats");
             // Draw the Special Cheats tab button
             DrawTabButton(Tab.SpecialCheats, "Special Cheats");
             GUILayout.EndHorizontal();
@@ -134,9 +134,9 @@ namespace archi_mods
             // Draw content based on the selected tab
             switch (_currentTab)
             {
-                // Draw the Main Cheats tab
-                case Tab.MainCheats:
-                    DrawMainCheatsTab();
+                // Draw the Player Cheats tab
+                case Tab.PlayerCheats:
+                    DrawPlayerCheatsTab();
                     break;
                 // Draw the Special Cheats tab
                 case Tab.SpecialCheats:
@@ -173,9 +173,9 @@ namespace archi_mods
         {
             switch (_currentTab)
             {
-                case Tab.MainCheats:
-                    // Return the activation status array for the main cheats tab
-                    return _mainCheatsActivated;
+                case Tab.PlayerCheats:
+                    // Return the activation status array for the player cheats tab
+                    return _playerCheatsActivated;
                 case Tab.SpecialCheats:
                     // Return the activation status array for the special cheats tab
                     return _specialCheatsActivated;
@@ -207,25 +207,25 @@ namespace archi_mods
         }
 
         /// <summary>
-        /// Method to draw content for the Main Cheats tab
+        /// Method to draw content for the Player Cheats tab
         /// </summary>
-        private void DrawMainCheatsTab()
+        private void DrawPlayerCheatsTab()
         {
             GUILayout.BeginVertical();
 
             // Draw buttons from the list
-            for (int i = 0; i < _mainCheatsButtonActions.Count; i++)
+            for (int i = 0; i < _playerCheatsButtonActions.Count; i++)
             {
                 GUILayout.BeginHorizontal();
-                DrawActivationDot(_mainCheatsActivated[i]); // Draw activation dot based on activation status
+                DrawActivationDot(_playerCheatsActivated[i]); // Draw activation dot based on activation status
 
                 // Draws a button for each cheat with the label, 
                 // activation status, and invokes the action associated 
                 // with the button when pressed
-                if (GUILayout.Button(_mainCheatsButtonActions[i].label))
+                if (GUILayout.Button(_playerCheatsButtonActions[i].label))
                 {
                     ToggleButtonActivation(i); // Toggle activation status
-                    _mainCheatsButtonActions[i].action.Invoke(); // Invoke the action associated with the button
+                    _playerCheatsButtonActions[i].action.Invoke(); // Invoke the action associated with the button
                 }
 
                 GUILayout.EndHorizontal();
@@ -501,12 +501,21 @@ namespace archi_mods
                     // Get the player's position
                     Vector3 playerPosition = player.transform.position;
 
+                    // Calculate the teleport position slightly in front of the player
+                    Vector3 teleportPosition = playerPosition + player.transform.forward * 3f;
+
                     // Find all game objects with the name "Entity(Clone)"
                     Entity[] entities = GameObject.FindObjectsOfType<Entity>();
+                    
+                    // Teleport each entity to the player's position
                     foreach (Entity entity in entities)
                     {
+                        // Skip the player object
+                        if (entity.gameObject == player)
+                            continue;
+                        
                         // Teleport the entity to the player's position
-                        entity.transform.position = playerPosition;
+                        entity.transform.position = teleportPosition;
                     }
                 }
             }
