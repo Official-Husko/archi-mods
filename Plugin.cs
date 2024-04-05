@@ -19,7 +19,7 @@ namespace archi_mods
 
         private Tab _currentTab = Tab.PlayerCheats;
         private bool _showMenu;
-        private Rect _menuRect = new(20, 20, 400, 230); // Initial position and size of the menu
+        private Rect _menuRect = new(20, 20, 400, 280); // Initial position and size of the menu
 
         // Define separate arrays to store activation status for each tab
         private readonly bool[] _playerCheatsActivated = new bool[8];
