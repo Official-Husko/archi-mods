@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ namespace archi_mods
 
         private Tab _currentTab = Tab.PlayerCheats;
         private bool _showMenu;
-        private Rect _menuRect = new(20, 20, 430, 200); // Initial position and size of the menu
+        private Rect _menuRect = new(20, 20, 400, 230); // Initial position and size of the menu
 
         // Define separate arrays to store activation status for each tab
         private readonly bool[] _playerCheatsActivated = new bool[8];
@@ -30,6 +30,8 @@ namespace archi_mods
         private const string VersionLabel = MyPluginInfo.PLUGIN_VERSION;
         private List<EntityCharacter.Faction> _availableFactions = new List<EntityCharacter.Faction>();
         private int _selectedFactionIndex;
+        public float extraDistance = 3f;
+        public float distanceBetweenChests = 2f;
 
         // List to store button labels and corresponding actions for the current cheats tab
         private readonly List<(string label, Action action)> _playerCheatsButtonActions = new()
@@ -272,6 +274,9 @@ namespace archi_mods
             // Draw Teleport button
             DrawTeleportNpcsButton();
             
+            // Draw Teleport chests button
+            DrawTeleportChestsButton();
+            
             // faction button
             DrawFactionsOption();
             
@@ -502,8 +507,8 @@ namespace archi_mods
                     Vector3 playerPosition = player.transform.position;
 
                     // Calculate the teleport position slightly in front of the player
-                    Vector3 teleportPosition = playerPosition + player.transform.forward * 3f;
-
+                    Vector3 teleportPosition = playerPosition + player.transform.forward * extraDistance;
+                    
                     // Find all game objects with the name "Entity(Clone)"
                     Entity[] entities = GameObject.FindObjectsOfType<Entity>();
                     
@@ -516,6 +521,64 @@ namespace archi_mods
                         
                         // Teleport the entity to the player's position
                         entity.transform.position = teleportPosition;
+                    }
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawTeleportChestsButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Teleport All Chests"))
+            {
+                // Find the player GameObject
+                GameObject player = GameObject.Find("Player(Clone)");
+                if (player == null)
+                {
+                    Debug.LogError("Player(Clone) not found.");
+                    return;
+                }
+
+                // Get the player's position and forward direction
+                Vector3 playerPosition = player.transform.position;
+                Vector3 playerForward = player.transform.forward;
+
+                // Calculate the teleport position in front of the player
+                Vector3 teleportPosition = playerPosition + playerForward * extraDistance;
+
+                // Find all "LootChest(Clone)" and "LootChest" GameObjects in the scene
+                GameObject[] lootChests = GameObject.FindObjectsOfType<GameObject>();
+
+                foreach (GameObject chest in lootChests)
+                {
+                    // list for valid chest names
+                    List<string> chestNames = new List<string>() { "LootChest(Clone)", "LootChestLocked(Clone)", "BanditCampChest(Clone)" };
+                    foreach (string name in chestNames)
+                    {
+                        if (chest.name == name)
+                        {
+                            // Calculate position for each chest
+                            teleportPosition += playerForward * distanceBetweenChests;
+
+                            // Use physics to place the chest on the terrain below it
+                            RaycastHit hit;
+                            if (Physics.Raycast(teleportPosition, Vector3.down, out hit))
+                            {
+                                chest.transform.position = hit.point;
+                            }
+                            else
+                            {
+                                Debug.LogWarning("Failed to place chest on terrain.");
+                            }
+
+                            // Rotate the chest to face the same direction as the player
+                            chest.transform.rotation = Quaternion.LookRotation(playerForward);
+                        }
                     }
                 }
             }
