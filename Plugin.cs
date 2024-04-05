@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace archi_mods
 {
-    [BepInPlugin("husko.archipelagates.cheats", "Gamer Archipelagates Cheats", MyPluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin("husko.archipelagates.cheats", "Archipelagates Cheats", MyPluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
         private enum Tab
@@ -28,13 +28,14 @@ namespace archi_mods
 
         private const string VersionLabel = MyPluginInfo.PLUGIN_VERSION;
         private List<EntityCharacter.Faction> _availableFactions = new List<EntityCharacter.Faction>();
-        private Vector2 _scrollPosition;
         private int _selectedFactionIndex;
 
         // List to store button labels and corresponding actions for the current cheats tab
         private readonly List<(string label, Action action)> _mainCheatsButtonActions = new()
         {
             ("Invincibility", ToggleInvincibility),
+            ("Clothed Skeleton Mode", ToggleSkeletonModeClothed),
+            ("Naked Skeleton Mode", ToggleSkeletonModeNaked),
             // Add more buttons and actions here
         };
 
@@ -323,19 +324,7 @@ namespace archi_mods
                         bool currentValue = (bool)fieldInfo.GetValue(entityCharacter);
                         fieldInfo.SetValue(entityCharacter, !currentValue);
                     }
-                    else
-                    {
-                        Debug.LogError("Unable to access the _invulnerable field via reflection.");
-                    }
                 }
-                else
-                {
-                    Debug.LogError("EntityCharacter component not found.");
-                }
-            }
-            else
-            {
-                Debug.LogError("PlayerStuff(Clone) GameObject not found.");
             }
         }
 
@@ -397,6 +386,82 @@ namespace archi_mods
                 }
             }
             GUILayout.EndHorizontal();
+        }
+        
+        private static void ToggleSkeletonModeClothed()
+        {
+            // Debug log the action being performed
+            Debug.Log("Toggle Clothed Skeleton Mode");
+            
+            List<string> _validNames = new List<string>() { "Canine" };
+            
+            GameObject player = GameObject.Find("Player(Clone)");
+            if (player != null)
+            {
+                Transform tumbler = player.transform.Find("Tumbler");
+                if (tumbler != null)
+                {
+                    Transform charcreatechibi = tumbler.Find("charcreatechibi");
+                    if (charcreatechibi != null)
+                    {
+                        foreach (string name in _validNames)
+                        {
+                            Transform body = charcreatechibi.Find("Body_" + name);
+                            if (body != null)
+                            {
+                                body.gameObject.SetActive(!body.gameObject.activeSelf);
+                            }
+                        }
+                        Transform skeleton = charcreatechibi.Find("Body_Skeleton");
+                        if (skeleton != null)
+                        {
+                            skeleton.gameObject.SetActive(!skeleton.gameObject.activeSelf);
+                        }
+                    }
+                }
+            }
+        }
+        
+        private static void ToggleSkeletonModeNaked()
+        {
+            // Debug log the action being performed
+            Debug.Log("Toggle Naked Skeleton Mode");
+            
+            List<string> _validNames = new List<string>() { "Canine" };
+            
+            GameObject player = GameObject.Find("Player(Clone)");
+            if (player != null)
+            {
+                Transform tumbler = player.transform.Find("Tumbler");
+                if (tumbler != null)
+                {
+                    Transform charcreatechibi = tumbler.Find("charcreatechibi");
+                    if (charcreatechibi != null)
+                    {
+                        foreach (string name in _validNames)
+                        {
+                            Transform body = charcreatechibi.Find("Body_" + name);
+                            if (body != null)
+                            {
+                                body.gameObject.SetActive(!body.gameObject.activeSelf);
+                            }
+                        }
+                        foreach (string name in _validNames)
+                        {
+                            Transform clothing = charcreatechibi.Find("Body_" + name + "_Clothes");
+                            if (clothing != null)
+                            {
+                                clothing.gameObject.SetActive(!clothing.gameObject.activeSelf);
+                            }
+                        }
+                        Transform skeleton = charcreatechibi.Find("Body_Skeleton");
+                        if (skeleton != null)
+                        {
+                            skeleton.gameObject.SetActive(!skeleton.gameObject.activeSelf);
+                        }
+                    }
+                }
+            }
         }
     }
 }
