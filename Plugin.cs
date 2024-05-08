@@ -26,15 +26,18 @@ namespace archi_mods
         // Define separate arrays to store activation status for each tab
         private readonly bool[] _playerCheatsActivated = new bool[8];
         private readonly bool[] _specialCheatsActivated = new bool[2]; // Adjust the size as per your requirement
+        private readonly bool[] _sceneCheatsActivated = new bool[2];
 
         // Default values
         private const string VersionLabel = MyPluginInfo.PLUGIN_VERSION;
-        private List<EntityBase.Faction> _availableFactions = new List<EntityBase.Faction>();
+        private readonly List<EntityBase.Faction> _availableFactions = new List<EntityBase.Faction>();
         private int _selectedFactionIndex;
         public float extraDistance = 3f;
         public float distanceBetweenChests = 2f;
+        
         private string _islandLevelAmountText = "0";
-        private bool _invincibilityCoroutineRunning = false;
+        private string _addGoldAmountText = "0";
+        private string _addExperienceAmountText = "0";
 
         // List to store button labels and corresponding actions for the current cheats tab
         private readonly List<(string label, Action action)> _playerCheatsButtonActions = new()
@@ -50,6 +53,12 @@ namespace archi_mods
         {
             // Add more buttons for Special Cheats here
         };
+        
+        // Modify the sceneCheatsButtonActions list to include a button for Scene Cheats
+        private readonly List<(string label, Action action)> _sceneCheatsButtonActions = new()
+        {
+            // Add more buttons for Scene Cheats here
+        };
 
         /// <summary>
         /// Initializes the plugin on Awake event
@@ -62,29 +71,25 @@ namespace archi_mods
             // Fetch available factions
             FetchAvailableFactions();
         }
-
-        private IEnumerator ActivateInvincibilityWhenPlayerSpawned()
+        
+        private IEnumerator SearchForPlayerObject()
         {
-            // Wait for a short delay before starting the loop
-            yield return new WaitForSeconds(1f); // Adjust the delay as needed
-
             while (true)
             {
-                // Check if invincibility cheat is activated
-                if (_playerCheatsActivated[(int)Tab.PlayerCheats])
+                // Find the player object by name
+                GameObject playerStuff = GameObject.Find("Player(Clone)");
+
+                // Check if the player object is found
+                if (playerStuff != null)
                 {
-                    // Find the "PlayerStuff(Clone)" GameObject
-                    GameObject playerStuff = GameObject.Find("Player(Clone)");
-                    if (playerStuff != null)
-                    {
-                        // Player is spawned, activate invincibility
-                        ToggleInvincibility();
-                        yield break; // Exit the coroutine
-                    }
+                    ToggleInvincibility();
+
+                    // Exit the loop if player object is found
+                    yield break;
                 }
 
-                // Wait for a short interval before checking again
-                yield return new WaitForSeconds(1f); // Adjust the interval as needed
+                // Wait for a short duration before the next iteration
+                yield return new WaitForSeconds(0.1f); // Adjust the duration as needed
             }
         }
         
@@ -102,14 +107,13 @@ namespace archi_mods
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            // This method will be called whenever a new scene is loaded
             Debug.Log("Scene loaded: " + scene.name);
 
-            // Activate invincibility when the player is spawned
-            if (!_invincibilityCoroutineRunning)
+            // Check if player enabled invincibility in the _playerCheatsActivated array
+            if (_playerCheatsActivated[0])
             {
-                StartCoroutine(ActivateInvincibilityWhenPlayerSpawned());
-                _invincibilityCoroutineRunning = true;
+                // Start searching for the player object
+                StartCoroutine(SearchForPlayerObject());
             }
         }
         
@@ -185,7 +189,7 @@ namespace archi_mods
             // Draw the Special Cheats tab button
             DrawTabButton(Tab.SpecialCheats, "Special Cheats");
             // Draw the Scenes tab button
-            DrawTabButton(Tab.SceneCheats, "Scenes");
+            DrawTabButton(Tab.SceneCheats, "Scenes Cheats");
             GUILayout.EndHorizontal();
 
             // Draw content based on the selected tab
@@ -240,6 +244,9 @@ namespace archi_mods
                 case Tab.SpecialCheats:
                     // Return the activation status array for the special cheats tab
                     return _specialCheatsActivated;
+                case Tab.SceneCheats:
+                    // Return the activation status array for the scene cheats tab
+                    return _sceneCheatsActivated;
                 default:
                     // If the tab is not recognized, return null
                     return null;
@@ -291,6 +298,18 @@ namespace archi_mods
 
                 GUILayout.EndHorizontal();
             }
+            
+            // Draw add gold button
+            //DrawAddGoldButton(); Doesn't work. TODO: FIX THIS SHIT
+            
+            // Draw add experience button
+            DrawAddExperienceButton();
+            
+            // Draw add energy button
+            DrawAddEnergyButton();
+            
+            // Draw upgrade health button
+            DrawUpgradeHealthButton();
 
             // End the vertical layout
             GUILayout.EndVertical();
@@ -352,22 +371,22 @@ namespace archi_mods
             GUILayout.BeginVertical();
 
             // Iterate through the list of special cheat buttons
-            for (int i = 0; i < _specialCheatsButtonActions.Count; i++)
+            for (int i = 0; i < _sceneCheatsButtonActions.Count; i++)
             {
                 // Begin horizontal layout for the button row
                 GUILayout.BeginHorizontal();
 
                 // Draw an activation dot based on the activation status
-                DrawActivationDot(_specialCheatsActivated[i]);
+                DrawActivationDot(_sceneCheatsActivated[i]);
 
                 // Draw a button for the special cheat
-                if (GUILayout.Button(_specialCheatsButtonActions[i].label))
+                if (GUILayout.Button(_sceneCheatsButtonActions[i].label))
                 {
                     // Toggle the activation status of the button
                     ToggleButtonActivation(i);
 
                     // Invoke the action associated with the button
-                    _specialCheatsButtonActions[i].action.Invoke();
+                    _sceneCheatsButtonActions[i].action.Invoke();
                 }
 
                 // End the horizontal layout for the button row
@@ -787,6 +806,89 @@ namespace archi_mods
                 }
             }
             
+            GUILayout.EndHorizontal();
+        }
+        
+        public void DrawUpgradeHealthButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Upgrade Health"))
+            {
+                Game.UpgradeHealth();
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        public void DrawAddGoldButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            // Add a label for the text field
+            GUILayout.Label("Add Gold Amount:"); // The text that appears next to the text field
+
+            // Draw the text field and capture user input
+            _addExperienceAmountText = GUILayout.TextField(_addGoldAmountText, GUILayout.Width(40)); // The text field that the user can edit
+
+            // Try to parse the input text as an integer
+            if (int.TryParse(_addGoldAmountText, out var addGoldAmountInt))
+            {
+                // Check if the parsed integer value is greater than 0
+                if (addGoldAmountInt > 0)
+                {
+                    // Draw the add button with custom width and height
+                    if (GUILayout.Button("Add", GUILayout.Width(40), GUILayout.Height(20)))
+                    {
+                        // add gold to player
+                    }
+                }
+            }
+            
+            GUILayout.EndHorizontal();
+        }
+        
+        public void DrawAddExperienceButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            // Draw the label and input field for adding experience
+            GUILayout.Label("Add Experience Amount:");
+            _addExperienceAmountText = GUILayout.TextField(_addExperienceAmountText, GUILayout.Width(50)); // Adjust width as needed
+
+            // Check if input is a valid integer greater than 0
+            int experienceAmount;
+            if (int.TryParse(_addExperienceAmountText, out experienceAmount) && experienceAmount > 0)
+            {
+                // If input is valid, show the button to add experience
+                if (GUILayout.Button("Add", GUILayout.Width(50))) // Adjust width as needed
+                {
+                    Game.AddExperience(experienceAmount);
+                }
+            }
+            
+            GUILayout.EndHorizontal();
+        }
+        
+        public void DrawAddEnergyButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Add Energy"))
+            {
+                Game.AddEnergy();
+            }
             GUILayout.EndHorizontal();
         }
     }
