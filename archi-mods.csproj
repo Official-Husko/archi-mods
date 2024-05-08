@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>archi_mods</AssemblyName>
-    <Description>My first plugin</Description>
-    <Version>1.0.0</Version>
+    <Description>Cheats for Archipelagates</Description>
+    <Version>1.0.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -28,16 +28,16 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>C:\Users\Official Husko\Downloads\Compressed\archipelagates-windows-64\Archipelagates_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Users\Official Husko\Downloads\Compressed\archipelagates-windows-64_2\Archipelagates_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="com.vilar.procisland">
-      <HintPath>C:\Users\Official Husko\Downloads\Compressed\archipelagates-windows-64\Archipelagates_Data\Managed\com.vilar.procisland.dll</HintPath>
+      <HintPath>C:\Users\Official Husko\Downloads\Compressed\archipelagates-windows-64_2\Archipelagates_Data\Managed\com.vilar.procisland.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>C:\Users\Official Husko\Downloads\Compressed\Gamer_Struggles_0.1.0\Gamer Struggles 0.1.0\Gamer Struggles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="VilarTools">
-      <HintPath>C:\Users\Official Husko\Downloads\Compressed\archipelagates-windows-64\Archipelagates_Data\Managed\VilarTools.dll</HintPath>
+      <HintPath>C:\Users\Official Husko\Downloads\Compressed\archipelagates-windows-64_2\Archipelagates_Data\Managed\VilarTools.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

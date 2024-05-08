@@ -28,7 +28,7 @@ namespace archi_mods
         // Default values
 
         private const string VersionLabel = MyPluginInfo.PLUGIN_VERSION;
-        private List<EntityCharacter.Faction> _availableFactions = new List<EntityCharacter.Faction>();
+        private List<EntityBase.Faction> _availableFactions = new List<EntityBase.Faction>();
         private int _selectedFactionIndex;
         public float extraDistance = 3f;
         public float distanceBetweenChests = 2f;
@@ -345,14 +345,14 @@ namespace archi_mods
 
         private void FetchAvailableFactions()
         {
-            Type entityCharacterType = typeof(EntityCharacter);
+            Type entityCharacterType = typeof(EntityBase);
             Type factionType = entityCharacterType.GetNestedType("Faction");
             if (factionType != null && factionType.IsEnum)
             {
                 Array factionValues = Enum.GetValues(factionType);
                 foreach (var value in factionValues)
                 {
-                    _availableFactions.Add((EntityCharacter.Faction)value);
+                    _availableFactions.Add((EntityBase.Faction)value);
                 }
             }
         }
