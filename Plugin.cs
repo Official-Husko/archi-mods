@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,8 @@ namespace archi_mods
         private enum Tab
         {
             PlayerCheats,
-            SpecialCheats
+            SpecialCheats,
+            SceneCheats
         }
 
         private Tab _currentTab = Tab.PlayerCheats;
@@ -26,12 +27,12 @@ namespace archi_mods
         private readonly bool[] _specialCheatsActivated = new bool[2]; // Adjust the size as per your requirement
 
         // Default values
-
         private const string VersionLabel = MyPluginInfo.PLUGIN_VERSION;
         private List<EntityBase.Faction> _availableFactions = new List<EntityBase.Faction>();
         private int _selectedFactionIndex;
         public float extraDistance = 3f;
         public float distanceBetweenChests = 2f;
+        private string _islandLevelAmountText = "0";
 
         // List to store button labels and corresponding actions for the current cheats tab
         private readonly List<(string label, Action action)> _playerCheatsButtonActions = new()
@@ -131,6 +132,8 @@ namespace archi_mods
             DrawTabButton(Tab.PlayerCheats, "Player Cheats");
             // Draw the Special Cheats tab button
             DrawTabButton(Tab.SpecialCheats, "Special Cheats");
+            // Draw the Scenes tab button
+            DrawTabButton(Tab.SceneCheats, "Scenes");
             GUILayout.EndHorizontal();
 
             // Draw content based on the selected tab
@@ -143,6 +146,10 @@ namespace archi_mods
                 // Draw the Special Cheats tab
                 case Tab.SpecialCheats:
                     DrawSpecialCheatsTab();
+                    break;
+                // Draw Scenes tab
+                case Tab.SceneCheats:
+                    DrawSceneCheatsTab();
                     break;
             }
 
@@ -282,6 +289,50 @@ namespace archi_mods
             
             // faction button
             DrawFactionsOption();
+            
+            // End the vertical layout for the tab
+            GUILayout.EndVertical();
+        }
+
+        private void DrawSceneCheatsTab()
+        {
+            // Begin vertical layout for the tab
+            GUILayout.BeginVertical();
+
+            // Iterate through the list of special cheat buttons
+            for (int i = 0; i < _specialCheatsButtonActions.Count; i++)
+            {
+                // Begin horizontal layout for the button row
+                GUILayout.BeginHorizontal();
+
+                // Draw an activation dot based on the activation status
+                DrawActivationDot(_specialCheatsActivated[i]);
+
+                // Draw a button for the special cheat
+                if (GUILayout.Button(_specialCheatsButtonActions[i].label))
+                {
+                    // Toggle the activation status of the button
+                    ToggleButtonActivation(i);
+
+                    // Invoke the action associated with the button
+                    _specialCheatsButtonActions[i].action.Invoke();
+                }
+
+                // End the horizontal layout for the button row
+                GUILayout.EndHorizontal();
+            }
+
+            // Draw sex test scene button
+            DrawSexTestSceneButton();
+            
+            // Draw combat test scene button
+            DrawCombatTestSceneButton();
+            
+            // Draw town scene button
+            DrawTownSceneButton();
+            
+            // Draw custom island scene button
+            DrawCustomIslandSceneButton();
             
             // End the vertical layout for the tab
             GUILayout.EndVertical();
@@ -615,6 +666,75 @@ namespace archi_mods
                     }
                 }
             }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawSexTestSceneButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Load Sex Test Scene"))
+            {
+                Game.GoToSexTest();
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawCombatTestSceneButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Load Combat Test Scene (Not Implemented?)"))
+            {
+                SceneManager.LoadScene("CombatTest");
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawTownSceneButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            if (GUILayout.Button("Load Town Scene"))
+            {
+                Game.LoadTown();
+            }
+            GUILayout.EndHorizontal();
+        }
+        
+        private void DrawCustomIslandSceneButton()
+        {
+            GUILayout.BeginHorizontal();
+
+            // Draw the dot
+            DrawBlueDot();
+            
+            // Add a label for the text field
+            GUILayout.Label("Custom Island with Level:"); // The text that appears next to the text field
+
+            // Draw the text field and capture user input
+            _islandLevelAmountText = GUILayout.TextField(_islandLevelAmountText, GUILayout.Width(40)); // The text field that the user can edit
+
+            // Try to parse the input text as an integer
+            if (int.TryParse(_islandLevelAmountText, out var islandLevelAmountInt))
+            {
+                // Draw the add button with custom width and height
+                if (GUILayout.Button("Load", GUILayout.Width(40), GUILayout.Height(20)))
+                {
+                    // Add Soul points to the player's data
+                    Game.LoadWildIsland(islandLevelAmountInt);
+                }
+            }
+            
             GUILayout.EndHorizontal();
         }
     }
