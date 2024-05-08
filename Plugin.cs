@@ -560,7 +560,7 @@ namespace archi_mods
                 foreach (GameObject chest in lootChests)
                 {
                     // list for valid chest names
-                    List<string> chestNames = new List<string>() { "LootChest(Clone)", "LootChestLocked(Clone)", "BanditCampChest(Clone)" };
+                    List<string> chestNames = new List<string>() { "LootChest", "LootChest(Clone)", "LootChestLocked", "LootChestLocked(Clone)","BanditCampChest", "BanditCampChest(Clone)" };
                     foreach (string name in chestNames)
                     {
                         if (chest.name == name)
