@@ -1,9 +1,10 @@
-using BepInEx;
+﻿using BepInEx;
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Vilar.Entity;
 
 namespace archi_mods
@@ -33,6 +34,7 @@ namespace archi_mods
         public float extraDistance = 3f;
         public float distanceBetweenChests = 2f;
         private string _islandLevelAmountText = "0";
+        private bool _invincibilityCoroutineRunning = false;
 
         // List to store button labels and corresponding actions for the current cheats tab
         private readonly List<(string label, Action action)> _playerCheatsButtonActions = new()
@@ -61,6 +63,56 @@ namespace archi_mods
             FetchAvailableFactions();
         }
 
+        private IEnumerator ActivateInvincibilityWhenPlayerSpawned()
+        {
+            // Wait for a short delay before starting the loop
+            yield return new WaitForSeconds(1f); // Adjust the delay as needed
+
+            while (true)
+            {
+                // Check if invincibility cheat is activated
+                if (_playerCheatsActivated[(int)Tab.PlayerCheats])
+                {
+                    // Find the "PlayerStuff(Clone)" GameObject
+                    GameObject playerStuff = GameObject.Find("Player(Clone)");
+                    if (playerStuff != null)
+                    {
+                        // Player is spawned, activate invincibility
+                        ToggleInvincibility();
+                        yield break; // Exit the coroutine
+                    }
+                }
+
+                // Wait for a short interval before checking again
+                yield return new WaitForSeconds(1f); // Adjust the interval as needed
+            }
+        }
+        
+        private void OnEnable()
+        {
+            // Subscribe to the sceneLoaded event
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            // Unsubscribe from the sceneLoaded event
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            // This method will be called whenever a new scene is loaded
+            Debug.Log("Scene loaded: " + scene.name);
+
+            // Activate invincibility when the player is spawned
+            if (!_invincibilityCoroutineRunning)
+            {
+                StartCoroutine(ActivateInvincibilityWhenPlayerSpawned());
+                _invincibilityCoroutineRunning = true;
+            }
+        }
+        
         /// <summary>
         /// Handles toggling the menu on and off with the Insert or F1 key.
         /// </summary>
@@ -337,7 +389,7 @@ namespace archi_mods
             // End the vertical layout for the tab
             GUILayout.EndVertical();
         }
-
+        
         /// <summary>
         /// Draws a small dot with a green color if the activation status is true, and red if it's false.
         /// This method uses the current tab activation status array to determine the dot color.
@@ -459,7 +511,7 @@ namespace archi_mods
             // Debug log the action being performed
             Debug.Log("Toggle Clothed Skeleton Mode");
             
-            List<string> _validNames = new List<string>() { "Canine" };
+            List<string> validNames = new List<string>() { "Canine" };
             
             GameObject player = GameObject.Find("Player(Clone)");
             if (player != null)
@@ -470,7 +522,7 @@ namespace archi_mods
                     Transform charcreatechibi = tumbler.Find("charcreatechibi");
                     if (charcreatechibi != null)
                     {
-                        foreach (string name in _validNames)
+                        foreach (string name in validNames)
                         {
                             Transform body = charcreatechibi.Find("Body_" + name);
                             if (body != null)
@@ -493,7 +545,7 @@ namespace archi_mods
             // Debug log the action being performed
             Debug.Log("Toggle Naked Skeleton Mode");
             
-            List<string> _validNames = new List<string>() { "Canine" };
+            List<string> validNames = new List<string>() { "Canine" };
             
             GameObject player = GameObject.Find("Player(Clone)");
             if (player != null)
@@ -504,7 +556,7 @@ namespace archi_mods
                     Transform charcreatechibi = tumbler.Find("charcreatechibi");
                     if (charcreatechibi != null)
                     {
-                        foreach (string name in _validNames)
+                        foreach (string name in validNames)
                         {
                             Transform body = charcreatechibi.Find("Body_" + name);
                             if (body != null)
@@ -512,7 +564,7 @@ namespace archi_mods
                                 body.gameObject.SetActive(!body.gameObject.activeSelf);
                             }
                         }
-                        foreach (string name in _validNames)
+                        foreach (string name in validNames)
                         {
                             Transform clothing = charcreatechibi.Find("Body_" + name + "_Clothes");
                             if (clothing != null)
